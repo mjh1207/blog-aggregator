@@ -3,8 +3,8 @@ package main
 import "fmt"
 
 type command struct {
-	name string
-	args []string
+	Name string
+	Args []string
 }
 
 type commands struct {
@@ -16,9 +16,9 @@ func (c *commands) register(name string, f func(*state, command) error) {
 }
 
 func (c *commands) run(s *state, cmd command) error {
-	handler, exists := c.handlers[cmd.name]
+	handler, exists := c.handlers[cmd.Name]
 	if !exists {
-		return fmt.Errorf("unknown command: %s", cmd.name)
+		return fmt.Errorf("unknown command: %s", cmd.Name)
 	}
 	
 	return handler(s, cmd)

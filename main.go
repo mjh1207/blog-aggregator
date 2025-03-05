@@ -18,11 +18,11 @@ func main() {
 		log.Fatalf("error reading config: %v", err)
 	}
 
-	db, err := sql.Open("postgres", cfg.DbURL)
+	db, err := sql.Open("postgres", cfg.DBURL)
 	if err != nil {
 		fmt.Println("Error: unable to open database connection", err)
 	}
-
+	defer db.Close()
 	dbQueries := database.New(db)
 	
 	// set current state
@@ -33,7 +33,7 @@ func main() {
 
 	// register commands
 	com := commands {
-		make(map[string]func(*state, command) error),
+		handlers: make(map[string]func(*state, command) error),
 	}
 	com.register("login", handlerLogin)
 	com.register("register", handlerRegister)
@@ -47,8 +47,8 @@ func main() {
 	cmdArgs := os.Args[2:]
 
 	cmd := command {
-		name: cmdName,
-		args: cmdArgs,
+		Name: cmdName,
+		Args: cmdArgs,
 	}
 
 	if err := com.run(&currentState, cmd); err != nil {
