@@ -2,9 +2,13 @@ package main
 
 import (
 	"blog-aggregator/internal/config"
+	"blog-aggregator/internal/database"
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -13,9 +17,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("error reading config: %v", err)
 	}
+
+	db, err := sql.Open("postgres", cfg.DbURL)
+	if err != nil {
+		fmt.Println("Error: unable to open database connection", err)
+	}
+
+	dbQueries := database.New(db)
 	
 	// set current state
 	currentState := state {
+		db: dbQueries,
 		cfg: &cfg,
 	}
 
@@ -24,6 +36,7 @@ func main() {
 		make(map[string]func(*state, command) error),
 	}
 	com.register("login", handlerLogin)
+	com.register("register", handlerRegister)
 
 	if len(os.Args) < 2 {
 		fmt.Println("Error: not enough arguments provided")
@@ -42,5 +55,7 @@ func main() {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
+
+	os.Exit(0)
 	
 }
