@@ -37,6 +37,7 @@ func main() {
 	}
 	com.register("login", handlerLogin)
 	com.register("register", handlerRegister)
+	com.register("reset", handlerReset)
 
 	if len(os.Args) < 2 {
 		fmt.Println("Error: not enough arguments provided")
