@@ -9,11 +9,11 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerFollow( s *state, cmd command) error {
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("unable to get user: %s", s.cfg.CurrentUserName)
-	}
+func handlerFollow( s *state, cmd command, user database.User) error {
+	// user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	// if err != nil {
+	// 	return fmt.Errorf("unable to get user: %s", s.cfg.CurrentUserName)
+	// }
 	
 	if len(cmd.Args) != 1 {
 		return fmt.Errorf("expected argument: url")

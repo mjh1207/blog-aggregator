@@ -40,10 +40,10 @@ func main() {
 	com.register("reset", handlerReset)
 	com.register("users", handlerUsers)
 	com.register ("agg", handlerAgg)
-	com.register("addfeed", handlerAddFeed)
+	com.register("addfeed", middlewareLoggedIn(handlerAddFeed))
 	com.register("feeds", handlerFeeds)
-	com.register("follow", handlerFollow)
-	com.register("following", handlerFollowing)
+	com.register("follow", middlewareLoggedIn(handlerFollow))
+	com.register("following", middlewareLoggedIn(handlerFollowing))
 
 	if len(os.Args) < 2 {
 		fmt.Println("Error: not enough arguments provided")

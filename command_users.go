@@ -15,9 +15,9 @@ func handlerUsers(s *state, cmd command) error {
 
 	for _, user := range dbUsers {
 		if user.Name == s.cfg.CurrentUserName {
-			fmt.Printf("* %s (current)", user.Name)
+			fmt.Printf("* %s (current)\n", user.Name)
 		} else {
-			fmt.Printf("* %s", user.Name)
+			fmt.Printf("* %s\n", user.Name)
 		}
 	}
 	return nil	
