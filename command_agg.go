@@ -5,7 +5,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
+	"strings"
 	"time"
+
+	"github.com/araddon/dateparse"
+	"github.com/google/uuid"
 )
 
 func handlerAgg(s *state, cmd command) error {
@@ -24,6 +29,7 @@ func handlerAgg(s *state, cmd command) error {
 	for ; ; <-ticker.C {
 		err := scrapeFeeds(s)
 		if err != nil {
+			fmt.Printf("%v", err)
 			return fmt.Errorf("there was an error scraping the next feed")
 		}
 	}
@@ -36,7 +42,7 @@ func scrapeFeeds(s *state) error {
 	}
 	err = s.db.MarkFeedFetched(context.Background(), database.MarkFeedFetchedParams{
 		UpdatedAt: time.Now().UTC(),
-		LastFetchedAt: sql.NullTime{time.Now().UTC(), true},
+		LastFetchedAt: sql.NullTime{Time: time.Now().UTC(), Valid: true},
 		ID: nextFeed.ID,
 	})
 
@@ -51,7 +57,37 @@ func scrapeFeeds(s *state) error {
 	}
 
 	for _, item := range feed.Channel.Item {
-		fmt.Printf("- %s\n", item.Title)
+		fmt.Println(item.Link)
+		pubAt, err := dateparse.ParseAny(item.PubDate)
+
+		if err != nil {
+			log.Printf("Failed to parse date %s: %v", item.PubDate, err)
+			pubAt = time.Now().UTC()
+		}
+		_, err = s.db.CreatePost(context.Background(), database.CreatePostParams{
+			ID: uuid.New(),
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
+			Title: sql.NullString{
+				String: strings.TrimSpace(item.Title),
+				Valid: item.Title != "",
+			},
+			Url: item.Link,
+			Description: sql.NullString{
+				String: strings.TrimSpace(item.Description),
+				Valid: item.Description != "",
+			},
+			PublishedAt: sql.NullTime{
+				Time: pubAt,
+				Valid: !pubAt.IsZero(),
+			},
+			FeedID: nextFeed.ID,
+		})
+		if err != nil && strings.Contains(err.Error(), "duplicate key") {
+			continue
+		} else if err != nil {
+			log.Printf("Failed to create post: %v", err)
+		}
 	}
 
 	return nil

@@ -45,6 +45,7 @@ func main() {
 	com.register("follow", middlewareLoggedIn(handlerFollow))
 	com.register("following", middlewareLoggedIn(handlerFollowing))
 	com.register("unfollow", middlewareLoggedIn(handlerUnfollow))
+	com.register("browse", middlewareLoggedIn(handlerBrowse))
 
 	if len(os.Args) < 2 {
 		fmt.Println("Error: not enough arguments provided")
